@@ -38,7 +38,6 @@
 - (void)setUpUI
 {
     self.resultImageView = [[UIImageView alloc] init];
-    self.resultImageView.backgroundColor = [UIColor redColor];
     [self.view addSubview:self.resultImageView];
     
     self.actionButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
@@ -56,13 +55,14 @@
 
 - (void)downLoadAndCompound
 {
-    /*****实现分组并发网络请求*****/
-    
     //在主线程中加载HUD
     dispatch_async(dispatch_get_main_queue(), ^{
         [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     });
     
+    
+    /*****实现分组并发网络请求*****/
+
     //创建GCD队列
     dispatch_group_t group = dispatch_group_create();
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -70,54 +70,60 @@
     //执行异步下载
     dispatch_group_async(group, queue, ^{
         
-        NSLog(@"异步下载1");
+        NSLog(@"异步下载01");
 //        NSURL*url = [NSURL URLWithString:BaiduLogoURL];
         NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%d.png", MineImageURLCommonPart, 0]];
         NSData *data = [NSData dataWithContentsOfURL:url];
         UIImage *image = [UIImage imageWithData:data];
         if (image) {
             [self.imageArray addObject:image];
+        } else {
+            NSLog(@"下载失败01");
         }
     });
     
     dispatch_group_async(group, queue, ^{
-        NSLog(@"异步下载2");
+        NSLog(@"异步下载02");
 //        NSURL*url = [NSURL URLWithString:BaiduLogoURL];
         NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%d.png", MineImageURLCommonPart, 1]];
         NSData *data = [NSData dataWithContentsOfURL:url];
         UIImage *image = [UIImage imageWithData:data];
         if (image) {
             [self.imageArray addObject:image];
+        } else {
+            NSLog(@"下载失败02");
         }
     });
     
     dispatch_group_async(group, queue, ^{
-        NSLog(@"异步下载3");
+        NSLog(@"异步下载03");
 //        NSURL*url = [NSURL URLWithString:BaiduLogoURL];
         NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%d.png", MineImageURLCommonPart, 2]];
         NSData *data = [NSData dataWithContentsOfURL:url];
         UIImage *image = [UIImage imageWithData:data];
         if (image) {
             [self.imageArray addObject:image];
+        } else {
+            NSLog(@"下载失败03");
         }
     });
     
     dispatch_group_async(group, queue, ^{
-        NSLog(@"异步下载4");
+        NSLog(@"异步下载04");
 //        NSURL*url = [NSURL URLWithString:BaiduLogoURL];
         NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%d.png", MineImageURLCommonPart, 3]];
         NSData *data = [NSData dataWithContentsOfURL:url];
         UIImage *image = [UIImage imageWithData:data];
         if (image) {
             [self.imageArray addObject:image];
+        } else {
+            NSLog(@"下载失败04");
         }
     });
     
-    //合成图片
+    //下载完成，合成图片
     dispatch_group_notify(group, queue, ^{
-        
-        NSLog(@"下载结束，开始合成，显示要回到主线程！");
-        
+        NSLog(@"下载任务结束");
         //开启图形上下文
         UIGraphicsBeginImageContext(CGSizeMake(CommonWidth, CommonHeight*self.imageArray.count));
         //绘图
@@ -131,14 +137,11 @@
         
         //在主线程中刷新UI
         dispatch_async(dispatch_get_main_queue(), ^{
-            
             [MBProgressHUD hideHUDForView:self.view animated:YES];
-
             [self.resultImageView setFrame:CGRectMake(0, 0, CommonWidth, CommonHeight*self.imageArray.count)];
             self.resultImageView.center = self.view.center;
             self.resultImageView.image = image;
         });
-        
     });
 }
 
