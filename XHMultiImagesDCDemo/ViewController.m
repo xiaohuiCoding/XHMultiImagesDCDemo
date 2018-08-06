@@ -37,19 +37,24 @@
 
 - (void)setUpUI
 {
-    self.resultImageView = [[UIImageView alloc] init];
-    [self.view addSubview:self.resultImageView];
-    
     self.actionButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
     [self.actionButton setCenter:CGPointMake(self.view.center.x, 80)];
-    [self.actionButton setTitle:@"开始" forState:UIControlStateNormal];
-    [self.actionButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [self.actionButton addTarget:self action:@selector(beginAction) forControlEvents:UIControlEventTouchUpInside];
+    [self.actionButton setTitle:@"测试" forState:UIControlStateNormal];
+    [self.actionButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    [self.actionButton setTitleColor:[UIColor blueColor] forState:UIControlStateHighlighted];
+    [self.actionButton addTarget:self action:@selector(action) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.actionButton];
+    
+    self.resultImageView = [[UIImageView alloc] init];
+    [self.view addSubview:self.resultImageView];
 }
 
-- (void)beginAction
+- (void)action
 {
+//    if (self.imageArray.count > 0) {
+//        [self.imageArray removeAllObjects];
+//    }
+//
     [self downLoadAndCompound];
 }
 
@@ -60,7 +65,6 @@
         [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     });
     
-    
     /*****实现分组并发网络请求*****/
 
     //创建GCD队列
@@ -69,7 +73,6 @@
     
     //执行异步下载
     dispatch_group_async(group, queue, ^{
-        
         NSLog(@"异步下载01");
 //        NSURL*url = [NSURL URLWithString:BaiduLogoURL];
         NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%d.png", MineImageURLCommonPart, 0]];
@@ -120,10 +123,12 @@
             NSLog(@"下载失败04");
         }
     });
+
+    
     
     //下载完成，合成图片
     dispatch_group_notify(group, queue, ^{
-        NSLog(@"下载任务结束");
+        NSLog(@"异步下载结束");
         //开启图形上下文
         UIGraphicsBeginImageContext(CGSizeMake(CommonWidth, CommonHeight*self.imageArray.count));
         //绘图
@@ -141,6 +146,7 @@
             [self.resultImageView setFrame:CGRectMake(0, 0, CommonWidth, CommonHeight*self.imageArray.count)];
             self.resultImageView.center = self.view.center;
             self.resultImageView.image = image;
+            [self.imageArray removeAllObjects];
         });
     });
 }
